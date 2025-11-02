@@ -1,1 +1,192 @@
-body {background: lightsteelblue;}
+body {
+    background: lightsteelblue;
+    padding-left: 50px;
+    padding-bottom: 50px;
+}
+
+.container {
+    width: 380px;
+    height: 600px;
+    background: white;
+    margin-right: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+
+.current-ip {
+    margin: 5px 0 0 0;
+    font-size: 11px;
+    opacity: 0.9;
+}
+
+.chat-box {
+    flex: 1;
+    background: #f0f2f5;
+    padding: 15px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.message-wrapper {
+    display: flex;
+    width: 100%;
+}
+
+.message-wrapper.left {
+    justify-content: flex-start;
+}
+
+.message-wrapper.right {
+    justify-content: flex-end;
+}
+
+.message-bubble {
+    position: relative;
+    max-width: 70%;
+    background: white;
+    border-radius: 18px;
+    padding: 8px 12px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.message-wrapper.left .message-bubble {
+    background: white;
+    border-bottom-left-radius: 4px;
+}
+
+.message-wrapper.right .message-bubble {
+    background: #0084ff;
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+
+.message-info {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 4px;
+}
+
+.username {
+    font-weight: 600;
+    font-size: 12px;
+    color: #0084ff;
+}
+
+.message-wrapper.right .username {
+    color: rgba(255,255,255,0.9);
+}
+
+.ip-address {
+    font-size: 10px;
+    color: #65676b;
+}
+
+.message-wrapper.right .ip-address {
+    color: rgba(255,255,255,0.7);
+}
+
+.message-text {
+    font-size: 14px;
+    line-height: 1.4;
+    word-wrap: break-word;
+    margin-bottom: 5px;
+}
+
+.delete-form {
+    display: inline;
+}
+
+.delete-btn {
+    background: transparent;
+    border: none;
+    color: #65676b;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0 5px;
+    opacity: 0.6;
+}
+
+.delete-btn:hover {
+    opacity: 1;
+}
+
+.message-wrapper.right .delete-btn {
+    color: white;
+}
+
+.add-form {
+    background: white;
+    padding: 12px;
+    border-top: 1px solid #e4e6eb;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.input-name {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    font-size: 13px;
+    outline: none;
+}
+
+.input-name:focus {
+    border-color: #0084ff;
+}
+
+.input-message {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    font-size: 14px;
+    font-family: Arial, sans-serif;
+    resize: none;
+    outline: none;
+    max-height: 80px;
+}
+
+.input-message:focus {
+    border-color: #0084ff;
+}
+
+.add-btn {
+    background: #0084ff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.add-btn:hover {
+    background: #0073e6;
+}
+
+/* Scrollbar styling */
+.chat-box::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-box::-webkit-scrollbar-track {
+    background: #f0f2f5;
+}
+
+.chat-box::-webkit-scrollbar-thumb {
+    background: #bcc0c4;
+    border-radius: 3px;
+}
+
+.chat-box::-webkit-scrollbar-thumb:hover {
+    background: #a8abad;
+}
