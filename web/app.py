@@ -7,21 +7,38 @@ from flask import jsonify
 from flask_socketio import SocketIO, emit
 from pymongo import MongoClient
 from bson import ObjectId
+import os
 
 sample = Flask(__name__)
-sample.config['SECRET_KEY'] = 'your-secret-key-here'
+sample.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
 socketio = SocketIO(sample, cors_allowed_origins="*")
 
-# MongoDB Connection
-mongo_client = MongoClient('mongodb://mongo:27017/')
-db = mongo_client['ipa2025']
-routers_collection = db['routers']
+# MongoDB Connection with authentication
+MONGO_URI = os.getenv('MONGO_URI')
+DB_NAME = os.getenv('DB_NAME')
+COLLECTION_NAME = os.getenv('COLLECTION_NAME')
+
+try:
+    mongo_client = MongoClient(MONGO_URI)
+    # Test connection
+    mongo_client.admin.command('ping')
+    print(f"✅ Connected to MongoDB: {MONGO_URI}")
+    db = mongo_client[DB_NAME]
+    routers_collection = db[COLLECTION_NAME]
+except Exception as e:
+    print(f"❌ Failed to connect to MongoDB: {e}")
+    mongo_client = None
+    db = None
+    routers_collection = None
 
 data = []
 
 @sample.route("/")
 def main():
-    routers = list(routers_collection.find())
+    if routers_collection is not None:
+        routers = list(routers_collection.find())
+    else:
+        routers = []
     return render_template("index.html", data=data, routers=routers)
 
 @socketio.on('send_message')
@@ -58,6 +75,10 @@ def delete_comment():
 # Router Management Routes
 @sample.route("/router/add", methods=["POST"])
 def add_router():
+    if routers_collection is None:
+        print("❌ MongoDB not connected")
+        return redirect(url_for("main"))
+    
     try:
         ip = request.form.get("ip")
         username = request.form.get("username")
@@ -78,6 +99,10 @@ def add_router():
 
 @sample.route("/router/delete/<router_id>", methods=["POST"])
 def delete_router(router_id):
+    if routers_collection is None:
+        print("❌ MongoDB not connected")
+        return redirect(url_for("main"))
+    
     try:
         routers_collection.delete_one({"_id": ObjectId(router_id)})
         socketio.emit('router_deleted', {'id': router_id}, broadcast=True)
@@ -88,6 +113,9 @@ def delete_router(router_id):
 
 @sample.route("/router/list", methods=["GET"])
 def get_routers():
+    if routers_collection is None:
+        return jsonify({"error": "MongoDB not connected"}), 500
+    
     try:
         routers = list(routers_collection.find())
         for router in routers:
