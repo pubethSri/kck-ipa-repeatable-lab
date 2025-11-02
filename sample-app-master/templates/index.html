@@ -40,9 +40,22 @@
         const messageForm = document.getElementById('messageForm');
         const yournameInput = document.getElementById('yourname');
         const messageInput = document.getElementById('message');
+        
+        // เก็บ IP ของตัวเอง
+        const myIP = "{{ request.remote_addr }}";
+        
+        // ตรวจสอบการเชื่อมต่อ
+        socket.on('connect', function() {
+            console.log('Connected to WebSocket server');
+        });
+        
+        socket.on('disconnect', function() {
+            console.log('Disconnected from WebSocket server');
+        });
 
         // เมื่อได้รับข้อความใหม่จาก server
         socket.on('new_message', function(data) {
+            console.log('Received message:', data);
             addMessageToChat(data);
             scrollToBottom();
         });
@@ -61,6 +74,7 @@
             const message = messageInput.value.trim();
             
             if (yourname && message) {
+                console.log('Sending message:', {yourname, message});
                 socket.emit('send_message', {
                     yourname: yourname,
                     message: message
@@ -75,7 +89,11 @@
         // ฟังก์ชันเพิ่มข้อความในแชท
         function addMessageToChat(data) {
             const messageWrapper = document.createElement('div');
-            messageWrapper.className = 'message-wrapper right';
+            
+            // ถ้า IP ของข้อความตรงกับ IP ของตัวเอง ให้แสดงฝั่งขวา (สีน้ำเงิน)
+            // ถ้าไม่ตรง ให้แสดงฝั่งซ้าย (สีขาว)
+            const isMyMessage = (data.ip_address === myIP);
+            messageWrapper.className = isMyMessage ? 'message-wrapper right' : 'message-wrapper left';
             
             messageWrapper.innerHTML = `
                 <div class="message-bubble">

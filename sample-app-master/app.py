@@ -21,6 +21,8 @@ def handle_message(json_data):
     message = json_data.get('message')
     ip_address = request.remote_addr
     
+    print(f"Received message from {yourname} ({ip_address}): {message}")
+    
     if yourname and message:
         message_data = {
             "yourname": yourname, 
@@ -29,6 +31,7 @@ def handle_message(json_data):
         }
         data.append(message_data)
         # ส่งข้อความไปยังทุกคนที่เชื่อมต่ออยู่
+        print(f"Broadcasting message to all clients: {message_data}")
         emit('new_message', message_data, broadcast=True)
 
 @sample.route("/delete", methods=["POST"])
