@@ -1,0 +1,27 @@
+<html>
+<head>
+    <title>Sample app</title>
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+    <h1>You are calling me from {{request.remote_addr}}</h1>
+    <form method="POST" action="/add">
+    <input name="yourname" placeholder="Yourname" required />
+    <input name="message" placeholder="Message" required />
+    <button type="submit">Add Comment</button>
+  </form>
+
+  <ul>
+    {% for comment in data %}
+      <li>
+	       {{ comment.yourname }} - {{ comment.message }}	 
+         <form method="POST" action="{{ url_for('delete_comment') }}" style="display:inline">
+           <input type="hidden" name="idx" value="{{ loop.index0 }}">
+           <button type="submit">Delete</button>
+         </form>
+      </li>
+    {% endfor %}
+  </ul>
+
+</body>
+</html>
