@@ -1,7 +1,6 @@
 services:
   mongo:
     image: mongo:6
-    container_name: mongo
     restart: unless-stopped
     ports:
       - "27017:27017"
@@ -15,7 +14,6 @@ services:
 
   web:
     build: ./web
-    container_name: web
     restart: unless-stopped
     ports:
       - "8080:8080"
@@ -59,6 +57,26 @@ services:
       DB_NAME: "${DB_NAME}"
       RABBITMQ_URI: "amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@${RABBIT_HOST}:5672/"
       RABBIT_HOST: "${RABBIT_HOST}"
+      PYTHONUNBUFFERED: 1
+    restart: always
+
+  worker:
+    build: ./worker
+    depends_on:
+      - mongo
+      - rabbitmq
+    networks:
+      - app-net
+    env_file:
+      - .env
+    environment:
+      MONGO_URI: "mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongo:27017/"
+      DB_NAME: "${DB_NAME}"
+      RABBIT_HOST: "${RABBIT_HOST}"
+      RABBITMQ_DEFAULT_USER: "${RABBITMQ_DEFAULT_USER}"
+      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_DEFAULT_PASS}"
+      ROUTER_USER: "${ROUTER_USER}"
+      ROUTER_PASS: "${ROUTER_PASS}"
       PYTHONUNBUFFERED: 1
     restart: always
 
