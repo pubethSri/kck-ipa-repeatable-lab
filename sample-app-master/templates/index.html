@@ -4,24 +4,33 @@
     <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
-    <h1>You are calling me from {{request.remote_addr}}</h1>
-    <form method="POST" action="/add">
-    <input name="yourname" placeholder="Yourname" required />
-    <input name="message" placeholder="Message" required />
-    <button type="submit">Add Comment</button>
-  </form>
 
-  <ul>
-    {% for comment in data %}
-      <li>
-	       {{ comment.yourname }} - {{ comment.message }}	 
-         <form method="POST" action="{{ url_for('delete_comment') }}" style="display:inline">
-           <input type="hidden" name="idx" value="{{ loop.index0 }}">
-           <button type="submit">Delete</button>
-         </form>
-      </li>
-    {% endfor %}
-  </ul>
+    <h1>Your are calling me from {{ request.remote_addr }}</h1>
+    <div class="container">
+        
+        <div class="chat-box">
+            {% for comment in data %}
+            <div class="message-wrapper right">
+                <div class="message-bubble">
+                    <div class="message-info">
+                        <span class="username">{{ comment.yourname }}</span>
+                        <span class="ip-address">{{ comment.ip_address }}</span>
+                    </div>
+                    <div class="message-text">{{ comment.message }}</div>
+                    <form method="POST" action="{{ url_for('delete_comment') }}" class="delete-form">
+                        <input type="hidden" name="idx" value="{{ loop.index0 }}">
+                        <button type="submit" class="delete-btn">×</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
 
+        <form method="POST" action="/add" class="add-form">
+            <input name="yourname" placeholder="Your name" required class="input-name" />
+            <textarea name="message" placeholder="Type your message..." required class="input-message" rows="2"></textarea>
+            <button type="submit" class="add-btn">Add Comment</button>
+        </form>
+    </div>
 </body>
 </html>

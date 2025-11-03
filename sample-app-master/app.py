@@ -16,9 +16,10 @@ def main():
 def add_comment():
     yourname = request.form.get("yourname")
     message = request.form.get("message")
+    ip_address = request.remote_addr
 
     if yourname and message:
-        data.append({"yourname": yourname, "message": message})
+        data.append({"yourname": yourname, "message": message, "ip_address": ip_address})
     return redirect(url_for("main"))
 
 @sample.route("/delete", methods=["POST"])
