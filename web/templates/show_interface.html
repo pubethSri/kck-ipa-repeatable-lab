@@ -1,0 +1,69 @@
+<html>
+<head>
+    <title>Sample app</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Router: {{ router_ip }}</h1>
+            <button>
+                <a href="{{ url_for('menu', ip=router_ip) }}">Back to Menu</a>
+            </button>
+        </div>
+
+        <div class="interface-details">
+            <div class="section-header">
+                <h2>Interface Details</h2>
+            </div>
+            <div class="section-body">
+                {% if data %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Interface</th>
+                            <th>IP Address</th>
+                            <th>Status</th>
+                            <th>Protocol</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for info in data %}
+                            {% for things in info.interfaces %}
+                            <tr>
+                                <td>{{ info.timestamp }}</td>
+                                <td>{{ things.interface }}</td>
+                                <td>{{ things.ip_address }}</td>
+                                <td>
+                                    {% if things.status == 'up' %}
+                                        <span>{{ things.status }}</span>
+                                    {% elif things.status == 'down' %}
+                                        <span>{{ things.status }}</span>
+                                    {% else %}
+                                        <span>{{ things.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if things.proto == 'up' %}
+                                        <span>{{ things.proto }}</span>
+                                    {% else %}
+                                        <span>{{ things.proto }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr> 
+                            {% endfor %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="no-data">
+                    <p>No interface data available</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,18 +1,19 @@
+"""Scheduler"""
+
 import time
-import os
-from bson import json_util
 from producer import produce
+from bson import json_util
 from database import get_router_info
+import os
 
-
-RABBIT_HOST = os.getenv("RABBIT_HOST")
+RABBITMQ_HOST = os.environ.get("RABBITMQ_HOST")
 
 
 def scheduler():
-    INTERVAL = 60
+    """Send router info to RabbitMQ"""
+    INTERVAL = 60.0
     next_run = time.monotonic()
     count = 0
-
     while True:
         now = time.time()
         now_str = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(now))
@@ -21,29 +22,20 @@ def scheduler():
         print(f"[{now_str_with_ms}] run #{count}")
 
         try:
-            for router in get_router_info():
-                # สร้าง message ให้ Worker1
-                message = {
-                    "router_name": router.get("name", "Router"),
-                    "router_ip": router.get("ip"),
-                    "username": router.get("username", "admin"),
-                    "password": router.get("password", "cisco"),
-                }
-
-                # แปลงเป็น bytes
-                body_bytes = json_util.dumps(message).encode("utf-8")
-
-                # ส่งไป RabbitMQ
-                produce(body_bytes)
-
+            for data in get_router_info():
+                data["action"] = "get_interfaces"
+                body_bytes = json_util.dumps(data).encode("utf-8")
+                produce(RABBITMQ_HOST, body_bytes)
+            for data in get_router_info():
+                data["action"] = "get_motd"
+                body_bytes = json_util.dumps(data).encode("utf-8")
+                produce(RABBITMQ_HOST, body_bytes)
         except Exception as e:
-            print(f"Error: {e}")
+            print(e)
             time.sleep(3)
-
         count += 1
         next_run += INTERVAL
         time.sleep(max(0.0, next_run - time.monotonic()))
 
 
-if __name__ == "__main__":
-    scheduler()
+scheduler()
