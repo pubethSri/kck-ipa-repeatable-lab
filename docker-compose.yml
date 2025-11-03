@@ -4,12 +4,12 @@ services:
     container_name: mongo
     restart: unless-stopped
     ports:
-      - "${MONGO_PORT:-27017}:27017"
+      - "27017:27017"
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME:-admin}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-password}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     volumes:
-      - mongo_data:/data/db
+      - mongo-data:/data/db
     networks:
       - app-net
 
@@ -18,24 +18,54 @@ services:
     container_name: web
     restart: unless-stopped
     ports:
-      - "${WEB_PORT:-8080}:8080"
+      - "8080:8080"
     environment:
-      - FLASK_ENV=${FLASK_ENV:-production}
-      - SECRET_KEY=${SECRET_KEY:-your-secret-key-here}
-      - MONGO_URI=mongodb://${MONGO_USERNAME:-admin}:${MONGO_PASSWORD:-password}@mongo:27017/
-      - DB_NAME=${DB_NAME:-ipa2025}
-      - COLLECTION_NAME=${COLLECTION_NAME:-routers}
+      - MONGO_URI=${MONGO_URI}
+      - DB_NAME=${DB_NAME}
+      - ROUTER_USER=${ROUTER_USER}
+      - ROUTER_PASS=${ROUTER_PASS}
     depends_on:
       - mongo
     networks:
       - app-net
+
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"       # AMQP (app connect)
+      - "15672:15672"     # Management UI
     volumes:
-      - ./web:/home/myapp
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - app-net
+    env_file:
+      - .env
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+
+  scheduler:
+    build: ./scheduler
+    depends_on:
+      - mongo
+      - rabbitmq
+    networks:
+      - app-net
+    env_file:
+      - .env
+    environment:
+      MONGO_URI: "mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongo:27017/"
+      DB_NAME: "${DB_NAME}"
+      RABBITMQ_URI: "amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@${RABBIT_HOST}:5672/"
+      RABBIT_HOST: "${RABBIT_HOST}"
+      PYTHONUNBUFFERED: 1
+    restart: always
 
 networks:
   app-net:
     driver: bridge
 
 volumes:
-  mongo_data:
-    driver: local
+  mongo-data:
+  rabbitmq-data:

@@ -10,13 +10,17 @@ from bson import ObjectId
 import os
 
 sample = Flask(__name__)
-sample.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "your-secret-key-here")
+sample.config["SECRET_KEY"] = "your-secret-key-here"
 socketio = SocketIO(sample, cors_allowed_origins="*")
 
 # MongoDB Connection with authentication
 MONGO_URI = os.getenv("MONGO_URI")
-DB_NAME = os.getenv("DB_NAME")
-COLLECTION_NAME = os.getenv("COLLECTION_NAME")
+DB_NAME = os.getenv("DB_NAME", "ipa2025")
+COLLECTION_NAME = "routers"  # Fixed collection name
+
+# Router credentials
+ROUTER_USER = os.getenv("ROUTER_USER", "admin")
+ROUTER_PASS = os.getenv("ROUTER_PASS", "cisco")
 
 try:
     mongo_client = MongoClient(MONGO_URI)
