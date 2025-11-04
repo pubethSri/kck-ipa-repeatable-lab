@@ -4,12 +4,14 @@ import os
 import json
 
 from flask import Flask, request, render_template, redirect, url_for
+from flask_socketio import SocketIO, emit
 from pymongo import MongoClient
 from bson import ObjectId
 
 from producer import produce
 
 APP = Flask(__name__)
+socketio = SocketIO(APP, cors_allowed_origins="*")
 
 MONGO_USER = os.environ.get("MONGO_INITDB_ROOT_USERNAME")
 MONGO_PASSWORD = os.environ.get("MONGO_INITDB_ROOT_PASSWORD")
@@ -25,6 +27,7 @@ MYCOL = MYDB["routers"]
 INFO = MYDB["interface_status"]
 MOTD = MYDB["motd_messages"]
 
+chat_messages = []
 
 @APP.route("/")
 def main():
@@ -141,6 +144,32 @@ def delete_loopback():
                 "password": router["password"]
             }).encode("utf-8"))
     return redirect(url_for("menu", ip=ip))
+
+@socketio.on('send_message')
+def handle_message(data):
+    yourname = data.get('yourname')
+    message = data.get('message')
+    ip_address = request.remote_addr
+    
+    if yourname and message:
+        message_data = {
+            "yourname": yourname,
+            "message": message,
+            "ip_address": ip_address
+        }
+        chat_messages.append(message_data)
+        # Broadcast to all clients
+        emit('new_message', message_data, broadcast=True)
+
+
+@socketio.on('connect')
+def handle_connect():
+    print(f'Client connected: {request.sid}')
+
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    print(f'Client disconnected: {request.sid}')
 
 if __name__ == "__main__":
     APP.run(host="0.0.0.0", port=8080)
