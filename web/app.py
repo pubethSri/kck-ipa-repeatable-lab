@@ -11,7 +11,7 @@ from bson import ObjectId
 from producer import produce
 
 APP = Flask(__name__)
-APP.config['SECRET_KEY'] = 'your-secret-key-here'
+APP.config["SECRET_KEY"] = "your-secret-key-here"
 socketio = SocketIO(APP, cors_allowed_origins="*")
 
 MONGO_USER = os.environ.get("MONGO_INITDB_ROOT_USERNAME")
@@ -41,8 +41,9 @@ def main():
 def menu(ip):
     router = MYCOL.find_one({"router_ipaddr": ip})
     if router:
-        return render_template("menu.html", router_ip=ip)
+        return render_template("menu2.html", router_ip=ip)
     return redirect("/")
+
 
 @APP.route("/add", methods=["POST"])
 def add_router():
@@ -74,7 +75,7 @@ def delete_router():
 @APP.route("/router/<string:ip>")
 def show_interfaces(ip):
     return render_template(
-        "show_interface.html", data=INFO.find({"router_ip": ip}), router_ip=ip
+        "show_interface2.html", data=INFO.find({"router_ip": ip}), router_ip=ip
     )
 
 
@@ -87,32 +88,39 @@ def show_motd(ip):
     if request.method == "POST":
         motd = request.form.get("motd")
         if motd:
-            produce(RABBITMQ_HOST, json.dumps({
-                "action": "set_motd",
-                "router_ipaddr": ip,
-                "message": motd,
-                "username": router["username"],
-                "password": router["password"]
-            }).encode("utf-8"))
-        return redirect(url_for("menu", ip=ip))
+            produce(
+                RABBITMQ_HOST,
+                json.dumps(
+                    {
+                        "action": "set_motd",
+                        "router_ipaddr": ip,
+                        "message": motd,
+                        "username": router["username"],
+                        "password": router["password"],
+                    }
+                ).encode("utf-8"),
+            )
+        return redirect(url_for("menu2", ip=ip))
 
     # Get the latest MOTD message for this router
-    latest_motd = MOTD.find_one(
-        {"router_ip": ip},
-        sort=[("timestamp", -1)]
+    latest_motd = MOTD.find_one({"router_ip": ip}, sort=[("timestamp", -1)])
+
+    current_motd = (
+        latest_motd["message"] if latest_motd["message"] != "" else "No MOTD set"
     )
+    return render_template("show_motd2.html", router_ip=ip, motd=current_motd)
 
-    current_motd = latest_motd["message"] if latest_motd["message"] != "" else "No MOTD set"
-    return render_template("show_motd.html", router_ip=ip, motd=current_motd)
 
-@APP.route('/configure_loopback/<ip>')
+@APP.route("/configure_loopback/<ip>")
 def configure_loopback(ip):
-    data = INFO.find_one({'router_ip': ip}, sort=[("timestamp", -1)])
+    data = INFO.find_one({"router_ip": ip}, sort=[("timestamp", -1)])
     loopback = [
-        iface for iface in data.get("interfaces", [])
+        iface
+        for iface in data.get("interfaces", [])
         if iface["interface"].startswith("Loopback")
     ]
-    return render_template("configure_loopback.html", data=loopback, router_ip=ip)
+    return render_template("configure_loopback2.html", data=loopback, router_ip=ip)
+
 
 @APP.route("/create_loopback", methods=["POST"])
 def create_loopback():
@@ -121,15 +129,21 @@ def create_loopback():
     ip = request.form.get("router_ip")
     router = MYCOL.find_one({"router_ipaddr": ip})
     print(loopbackNumber, interface_ip, ip)
-    produce(RABBITMQ_HOST, json.dumps({
-        "action": "create_loopback",
-        "router_ipaddr": ip,
-        "loopback_number": loopbackNumber,
-        "interface_ip": interface_ip,
-        "username": router["username"],
-        "password": router["password"]
-    }).encode("utf-8"))
-    return redirect(url_for("menu", ip=ip))
+    produce(
+        RABBITMQ_HOST,
+        json.dumps(
+            {
+                "action": "create_loopback",
+                "router_ipaddr": ip,
+                "loopback_number": loopbackNumber,
+                "interface_ip": interface_ip,
+                "username": router["username"],
+                "password": router["password"],
+            }
+        ).encode("utf-8"),
+    )
+    return redirect(url_for("menu2", ip=ip))
+
 
 @APP.route("/delete_loopback", methods=["POST"])
 def delete_loopback():
@@ -138,42 +152,48 @@ def delete_loopback():
     ip = request.form.get("router_ip")
     router = MYCOL.find_one({"router_ipaddr": ip})
     print(loopbackNumber, interface_ip, ip)
-    produce(RABBITMQ_HOST, json.dumps({
+    produce(
+        RABBITMQ_HOST,
+        json.dumps(
+            {
                 "action": "delete_loopback",
                 "router_ipaddr": ip,
                 "loopback_number": loopbackNumber,
                 "interface_ip": interface_ip,
                 "username": router["username"],
-                "password": router["password"]
-            }).encode("utf-8"))
-    return redirect(url_for("menu", ip=ip))
+                "password": router["password"],
+            }
+        ).encode("utf-8"),
+    )
+    return redirect(url_for("menu2", ip=ip))
+
 
 # WebSocket Chat Events
-@socketio.on('send_message')
+@socketio.on("send_message")
 def handle_message(data):
-    yourname = data.get('yourname')
-    message = data.get('message')
+    yourname = data.get("yourname")
+    message = data.get("message")
     ip_address = request.remote_addr
-    
+
     if yourname and message:
         message_data = {
             "yourname": yourname,
             "message": message,
-            "ip_address": ip_address
+            "ip_address": ip_address,
         }
         chat_messages.append(message_data)
         # Broadcast to all clients
-        emit('new_message', message_data, broadcast=True)
+        emit("new_message", message_data, broadcast=True)
 
 
-@socketio.on('connect')
+@socketio.on("connect")
 def handle_connect():
-    print(f'Client connected: {request.sid}')
+    print(f"Client connected: {request.sid}")
 
 
-@socketio.on('disconnect')
+@socketio.on("disconnect")
 def handle_disconnect():
-    print(f'Client disconnected: {request.sid}')
+    print(f"Client disconnected: {request.sid}")
 
 
 if __name__ == "__main__":

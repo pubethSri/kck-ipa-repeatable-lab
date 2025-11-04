@@ -10,6 +10,7 @@ MONGO_LOCATION = os.environ.get("MONGO_LOCATION")
 mongo_uri = f"mongodb://{MONGO_USER}:{MONGO_PASSWORD}@{MONGO_LOCATION}:27017/"
 db_name = os.environ.get("DB_NAME")
 
+
 def insert_interface_status(data):
     client = MongoClient(mongo_uri)
     db = client[db_name]
@@ -35,8 +36,7 @@ def insert_motd_message(data):
 
     # Get the latest MOTD for this router
     existing_motd = motd_messages.find_one(
-        {"router_ip": router_ip},
-        sort=[("timestamp", -1)]
+        {"router_ip": router_ip}, sort=[("timestamp", -1)]
     )
 
     ts = time.time()
@@ -46,8 +46,7 @@ def insert_motd_message(data):
     if existing_motd and existing_motd.get("message") == message:
         # Update timestamp if message is the same
         motd_messages.update_one(
-            {"_id": existing_motd["_id"]},
-            {"$set": {"timestamp": dt}}
+            {"_id": existing_motd["_id"]}, {"$set": {"timestamp": dt}}
         )
         print(f"Updated timestamp for existing MOTD on router {router_ip}")
     else:

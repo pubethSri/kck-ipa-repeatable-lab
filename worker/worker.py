@@ -11,6 +11,7 @@ RABBITMQ_HOST = os.environ.get("RABBITMQ_HOST")
 
 CREDENTIALS = pika.PlainCredentials(RABBITMQ_USERNAME, RABBITMQ_PASSWORD)
 
+
 def consume(host):
     connection = pika.BlockingConnection(
         pika.ConnectionParameters(host, credentials=CREDENTIALS)
