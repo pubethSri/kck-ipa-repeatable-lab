@@ -27,13 +27,15 @@ MYDB = CLIENT[DB_NAME]
 MYCOL = MYDB["routers"]
 INFO = MYDB["interface_status"]
 MOTD = MYDB["motd_messages"]
-
-# Chat data
-chat_messages = []
+CHAT = MYDB["chat_messages"]
 
 
 @APP.route("/")
 def main():
+    # Get chat messages from MongoDB, sorted by newest first, limit to last 50
+    chat_messages = list(CHAT.find().sort("_id", -1).limit(50))
+    # Reverse to show oldest first
+    chat_messages.reverse()
     return render_template("index.html", data=MYCOL.find(), chat_messages=chat_messages)
 
 
@@ -181,7 +183,8 @@ def handle_message(data):
             "message": message,
             "ip_address": ip_address,
         }
-        chat_messages.append(message_data)
+        # Save to MongoDB
+        CHAT.insert_one(message_data)
         # Broadcast to all clients
         emit("new_message", message_data, broadcast=True)
 
