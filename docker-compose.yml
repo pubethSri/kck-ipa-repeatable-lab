@@ -34,6 +34,36 @@ services:
     volumes:
       - ./web:/home/myapp
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"       # AMQP (app connect)
+      - "15672:15672"     # Management UI
+    networks:
+      - app-net
+    env_file:
+      - .env
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-admin}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-rabbitmq}
+
+  scheduler:
+    build: ./scheduler
+    depends_on:
+      - mongo
+      - rabbitmq
+    networks:
+      - app-net
+    env_file:
+      - .env
+    environment:
+      MONGO_URI: "mongodb://${MONGO_USERNAME:-admin}:${MONGO_PASSWORD:-password}@mongo:27017/"
+      DB_NAME: "${DB_NAME:-ipa2025}"
+      RABBITMQ_URI: "amqp://${RABBITMQ_DEFAULT_USER:-admin}:${RABBITMQ_DEFAULT_PASS:-rabbitmq}@${RABBITMQ_HOST:-rabbitmq}:5672/"
+      RABBIT_HOST: "${RABBITMQ_HOST:-rabbitmq}"
+      PYTHONUNBUFFERED: 1
+    restart: always
+
 networks:
   app-net:
     driver: bridge
