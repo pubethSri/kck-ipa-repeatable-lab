@@ -17,9 +17,9 @@ def get_interfaces(router_ip, username, password):
     interfaces_data = show_interface(
         router_ip, username, password
     )
-    # insert_interface_status(
-    #     {"router_ip": router_ip, "timestamp": "", "interfaces": interfaces_data}
-    # )
+    insert_interface_status(
+        {"router_ip": router_ip, "timestamp": "", "interfaces": interfaces_data}
+    )
 
 def callback(ch, method, properties, body):
     data = json.loads(body.decode())
@@ -44,34 +44,33 @@ def callback(ch, method, properties, body):
     elif data["action"] == "create_loopback":
         loopback_number = data.get("loopback_number")
         loopback_ip = data.get("interface_ip")
-        # result = create_loopback(
-        #     router_ip,
-        #     username,
-        #     password,
-        #     loopback_number,
-        #     loopback_ip,
-        # )
+        result = create_loopback(
+            router_ip,
+            username,
+            password,
+            loopback_number,
+            loopback_ip,
+        )
         get_interfaces(
             router_ip, username, password
         )
-        # print(f"Create Loopback result for router {router_ip}: {result}")
+        print(f"Create Loopback result for router {router_ip}: {result}")
     elif data["action"] == "delete_loopback":
         loopback_number = data.get("loopback_number")
-        # result = delete_loopback(
-        #     router_ip,
-        #     username,
-        #     password,
-        #     loopback_number,
-        # )
+        result = delete_loopback(
+            router_ip,
+            username,
+            password,
+            loopback_number,
+        )
         get_interfaces(
             router_ip, username, password
         )
-        # print(f"Delete Loopback result for router {router_ip}: {result}")
+        print(f"Delete Loopback result for router {router_ip}: {result}")
     else:
         get_interfaces(router_ip, username, password)
 
     print(f"Received job for router {router_ip}")
-    #print(json.dumps(interfaces_data, indent=2))
 
     time.sleep(body.count(b"."))
     ch.basic_ack(delivery_tag=method.delivery_tag)
