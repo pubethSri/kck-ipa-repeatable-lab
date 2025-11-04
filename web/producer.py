@@ -11,7 +11,7 @@ CREDENTIALS = pika.PlainCredentials(RABBITMQ_USERNAME, RABBITMQ_PASSWORD)
 
 
 def produce(host, body):
-    """Produce work to RabbitMQ"""
+    """Produce work to RabbitMQ by Web"""
     connection = pika.BlockingConnection(
         pika.ConnectionParameters(host, credentials=CREDENTIALS)
     )

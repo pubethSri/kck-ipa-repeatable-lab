@@ -1,4 +1,4 @@
 FROM python
 COPY .. /home/myapp/
 RUN pip install -r /home/myapp/requirements.txt
-CMD python /home/myapp/scheduler.py
+CMD ["python3", "-u", "/home/myapp/scheduler.py"]

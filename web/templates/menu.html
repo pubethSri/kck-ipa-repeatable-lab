@@ -1,0 +1,23 @@
+<html>
+<head>
+    <title>Router Management Menu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Router: {{ router_ip }}</h1>
+        </div>
+
+        <div class="menu">
+            <h2>Choose an Action</h2>
+            <div class="menu-links">
+                <button><a href="{{ url_for('show_interfaces', ip=router_ip) }}">Show Interface Status</a></button>
+                <button><a href="{{ url_for('show_motd', ip=router_ip) }}">Message of the Day (MOTD)</a></button>
+                <button><a href="{{ url_for('main') }}">Back to Router List</a></button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

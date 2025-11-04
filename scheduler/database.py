@@ -1,10 +1,16 @@
+"""Database"""
+
 import os
 
 from pymongo import MongoClient
 
 
 def get_router_info():
-    mongo_uri = os.environ.get("MONGO_URI")
+    """Get router info from DB"""
+    MONGO_USER = os.environ.get("MONGO_INITDB_ROOT_USERNAME")
+    MONGO_PASSWORD = os.environ.get("MONGO_INITDB_ROOT_PASSWORD")
+    MONGO_LOCATION = os.environ.get("MONGO_LOCATION")
+    mongo_uri = f"mongodb://{MONGO_USER}:{MONGO_PASSWORD}@{MONGO_LOCATION}:27017/"
     db_name = os.environ.get("DB_NAME")
 
     client = MongoClient(mongo_uri)
@@ -12,8 +18,6 @@ def get_router_info():
     routers = db["routers"]
 
     router_data = routers.find()
-    # for data in router_data:
-    #     print(data)
     return router_data
 
 

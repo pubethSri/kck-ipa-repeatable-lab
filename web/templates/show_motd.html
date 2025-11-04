@@ -1,0 +1,38 @@
+<html>
+<head>
+    <title>Sample app</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Router: {{ router_ip }}</h1>
+            <button>
+                <a href="{{ url_for('menu', ip=router_ip) }}">Back to Menu</a>
+            </button>
+        </div>
+
+        <div class="motd-details">
+            <div class="section-header">
+                <h2>Message of the Day</h2>
+            </div>
+            <div class="section-body">
+                <div class="current-message">
+                    <h3>Current Message:</h3>
+                    <p>{{ motd }}</p>
+                </div>
+                <hr>
+                <form method="POST" onsubmit="alert('MOTD will be updated in 1 minute'); return true;">
+                    <div class="form-group">
+                        <label for="motd">Set New Message of the Day</label>
+                        <textarea id="motd" name="motd" rows="3" 
+                            placeholder="Enter new message of the day..." required></textarea>
+                    </div>
+                    <button type="submit">Update MOTD</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

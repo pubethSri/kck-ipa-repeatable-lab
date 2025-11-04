@@ -1,137 +1,138 @@
-from flask import Flask
-from flask import request
-from flask import render_template
-from flask import redirect
-from flask import url_for
-from flask import jsonify
+"""Flask App"""
+
+import os
+import json
+
+from flask import Flask, request, render_template, redirect, url_for
 from flask_socketio import SocketIO, emit
 from pymongo import MongoClient
 from bson import ObjectId
-import os
 
-sample = Flask(__name__)
-sample.config["SECRET_KEY"] = "your-secret-key-here"
-socketio = SocketIO(sample, cors_allowed_origins="*")
+from producer import produce
 
-# MongoDB Connection with authentication
-MONGO_URI = os.getenv("MONGO_URI")
-DB_NAME = os.getenv("DB_NAME", "ipa2025")
-COLLECTION_NAME = "routers"  # Fixed collection name
+APP = Flask(__name__)
+APP.config['SECRET_KEY'] = 'your-secret-key-here'
+socketio = SocketIO(APP, cors_allowed_origins="*")
 
-# Router credentials
-ROUTER_USER = os.getenv("ROUTER_USER", "admin")
-ROUTER_PASS = os.getenv("ROUTER_PASS", "cisco")
+MONGO_USER = os.environ.get("MONGO_INITDB_ROOT_USERNAME")
+MONGO_PASSWORD = os.environ.get("MONGO_INITDB_ROOT_PASSWORD")
+MONGO_LOCATION = os.environ.get("MONGO_LOCATION")
+RABBITMQ_HOST = os.environ.get("RABBITMQ_LOCATION", "rabbitmq")
 
-try:
-    mongo_client = MongoClient(MONGO_URI)
-    # Test connection
-    mongo_client.admin.command("ping")
-    print(f"✅ Connected to MongoDB: {MONGO_URI}")
-    db = mongo_client[DB_NAME]
-    routers_collection = db[COLLECTION_NAME]
-except Exception as e:
-    print(f"❌ Failed to connect to MongoDB: {e}")
-    mongo_client = None
-    db = None
-    routers_collection = None
+MONGO_URI = f"mongodb://{MONGO_USER}:{MONGO_PASSWORD}@{MONGO_LOCATION}:27017/"
+DB_NAME = os.environ.get("DB_NAME")
 
-data = []
+CLIENT = MongoClient(MONGO_URI)
+MYDB = CLIENT[DB_NAME]
+MYCOL = MYDB["routers"]
+INFO = MYDB["interface_status"]
+MOTD = MYDB["motd_messages"]
+
+# Chat data
+chat_messages = []
 
 
-@sample.route("/")
+@APP.route("/")
 def main():
-    if routers_collection is not None:
-        routers = list(routers_collection.find())
-    else:
-        routers = []
-    return render_template("index.html", data=data, routers=routers)
+    return render_template("index.html", data=MYCOL.find(), chat_messages=chat_messages)
 
 
-@socketio.on("send_message")
-def handle_message(json_data):
-    yourname = json_data.get("yourname")
-    message = json_data.get("message")
-    ip_address = request.remote_addr
+@APP.route("/menu/<string:ip>")
+def menu(ip):
+    router = MYCOL.find_one({"router_ipaddr": ip})
+    if router:
+        return render_template("menu.html", router_ip=ip)
+    return redirect("/")
 
-    print(f"Received message from {yourname} ({ip_address}): {message}")
+@APP.route("/add", methods=["POST"])
+def add_router():
+    router_ipaddr = request.form.get("router_ipaddr")
+    username = request.form.get("username")
+    password = request.form.get("password")
 
-    if yourname and message:
-        message_data = {
-            "yourname": yourname,
-            "message": message,
-            "ip_address": ip_address,
+    if router_ipaddr and username and password:
+        router_info = {
+            "router_ipaddr": router_ipaddr,
+            "username": username,
+            "password": password,
         }
-        data.append(message_data)
-        # ส่งข้อความไปยังทุกคนที่เชื่อมต่ออยู่
-        print(f"Broadcasting message to all clients: {message_data}")
-        emit("new_message", message_data, broadcast=True)
+        MYCOL.insert_one(router_info)
+    return redirect("/")
 
 
-@sample.route("/delete", methods=["POST"])
-def delete_comment():
+@APP.route("/delete", methods=["POST"])
+def delete_router():
+    id = request.form.get("_id")
     try:
-        idx = int(request.form.get("idx"))
-        if 0 <= idx < len(data):
-            data.pop(idx)
-            # แจ้งให้ทุกคนรีเฟรช
-            socketio.emit("message_deleted", {"index": idx}, broadcast=True)
+        print(f"Del: {id}")
+        MYCOL.delete_one({"_id": ObjectId(id)})
     except Exception:
         pass
     return redirect(url_for("main"))
 
 
-# Router Management Routes
-@sample.route("/router/add", methods=["POST"])
-def add_router():
-    if routers_collection is None:
-        print("❌ MongoDB not connected")
-        return redirect(url_for("main"))
-
-    try:
-        ip = request.form.get("ip")
-        username = request.form.get("username")
-        password = request.form.get("password")
-
-        if ip and username and password:
-            router_data = {"ip": ip, "username": username, "password": password}
-            routers_collection.insert_one(router_data)
-            socketio.emit("router_added", router_data, broadcast=True)
-    except Exception as e:
-        print(f"Error adding router: {e}")
-
-    return redirect(url_for("main"))
+@APP.route("/router/<string:ip>")
+def show_interfaces(ip):
+    return render_template(
+        "show_interface.html", data=INFO.find({"router_ip": ip}), router_ip=ip
+    )
 
 
-@sample.route("/router/delete/<router_id>", methods=["POST"])
-def delete_router(router_id):
-    if routers_collection is None:
-        print("❌ MongoDB not connected")
-        return redirect(url_for("main"))
+@APP.route("/motd/<string:ip>", methods=["GET", "POST"])
+def show_motd(ip):
+    router = MYCOL.find_one({"router_ipaddr": ip})
+    if not router:
+        return redirect("/")
 
-    try:
-        routers_collection.delete_one({"_id": ObjectId(router_id)})
-        socketio.emit("router_deleted", {"id": router_id}, broadcast=True)
-    except Exception as e:
-        print(f"Error deleting router: {e}")
+    if request.method == "POST":
+        motd = request.form.get("motd")
+        if motd:
+            produce(RABBITMQ_HOST, json.dumps({
+                "action": "set_motd",
+                "router_ipaddr": ip,
+                "message": motd,
+                "username": router["username"],
+                "password": router["password"]
+            }).encode("utf-8"))
+        return redirect(url_for("menu", ip=ip))
 
-    return redirect(url_for("main"))
+    # Get the latest MOTD message for this router
+    latest_motd = MOTD.find_one(
+        {"router_ip": ip},
+        sort=[("timestamp", -1)]
+    )
+
+    current_motd = latest_motd["message"] if latest_motd["message"] != "" else "No MOTD set"
+    return render_template("show_motd.html", router_ip=ip, motd=current_motd)
 
 
-@sample.route("/router/list", methods=["GET"])
-def get_routers():
-    if routers_collection is None:
-        return jsonify({"error": "MongoDB not connected"}), 500
+# WebSocket Chat Events
+@socketio.on('send_message')
+def handle_message(data):
+    yourname = data.get('yourname')
+    message = data.get('message')
+    ip_address = request.remote_addr
+    
+    if yourname and message:
+        message_data = {
+            "yourname": yourname,
+            "message": message,
+            "ip_address": ip_address
+        }
+        chat_messages.append(message_data)
+        # Broadcast to all clients
+        emit('new_message', message_data, broadcast=True)
 
-    try:
-        routers = list(routers_collection.find())
-        for router in routers:
-            router["_id"] = str(router["_id"])
-        return jsonify(routers)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+
+@socketio.on('connect')
+def handle_connect():
+    print(f'Client connected: {request.sid}')
+
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    print(f'Client disconnected: {request.sid}')
 
 
 if __name__ == "__main__":
-    socketio.run(
-        sample, host="0.0.0.0", port=8080, debug=True, allow_unsafe_werkzeug=True
-    )
+    socketio.run(APP, host="0.0.0.0", port=8080, debug=True, allow_unsafe_werkzeug=True)
