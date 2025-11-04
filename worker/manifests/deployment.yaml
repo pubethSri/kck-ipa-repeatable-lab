@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kck-ipa-repeatable-lab-worker
+  namespace: ipa2025
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kck-ipa-repeatable-lab-worker
+  template:
+    metadata:
+      labels:
+        app: kck-ipa-repeatable-lab-worker
+    spec:
+      containers:
+        - name: kck-ipa-repeatable-lab-worker
+          image: kuqing/kck-ipa-repeatable-lab-worker:latest
+          envFrom:
+            - secretRef:
+                name: "super-secret"
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
+      restartPolicy: Always
