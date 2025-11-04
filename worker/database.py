@@ -20,7 +20,7 @@ def insert_interface_status(data):
     data["timestamp"] = dt
 
     interface_status.insert_one(data)
-    router_ip = data.get("router_ipaddr")
+    router_ip = data.get("router_ip")
 
     print(f"Stored interface status for {router_ip}")
 

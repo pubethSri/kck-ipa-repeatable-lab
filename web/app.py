@@ -99,6 +99,48 @@ def show_motd(ip):
     current_motd = latest_motd["message"] if latest_motd["message"] != "" else "No MOTD set"
     return render_template("show_motd.html", router_ip=ip, motd=current_motd)
 
+@APP.route('/configure_loopback/<ip>')
+def configure_loopback(ip):
+    data = INFO.find_one({'router_ip': ip}, sort=[("timestamp", -1)])
+    loopback = [
+        iface for iface in data.get("interfaces", [])
+        if iface["interface"].startswith("Loopback")
+    ]
+    return render_template("configure_loopback.html", data=loopback, router_ip=ip)
+
+@APP.route("/create_loopback", methods=["POST"])
+def create_loopback():
+    loopbackNumber = request.form.get("loopbackNumber")
+    interface_ip = request.form.get("interface_ip")
+    ip = request.form.get("router_ip")
+    router = MYCOL.find_one({"router_ipaddr": ip})
+    print(loopbackNumber, interface_ip, ip)
+    produce(RABBITMQ_HOST, json.dumps({
+        "action": "create_loopback",
+        "router_ipaddr": ip,
+        "loopback_number": loopbackNumber,
+        "interface_ip": interface_ip,
+        "username": router["username"],
+        "password": router["password"]
+    }).encode("utf-8"))
+    return redirect(url_for("menu", ip=ip))
+
+@APP.route("/delete_loopback", methods=["POST"])
+def delete_loopback():
+    loopbackNumber = request.form.get("interface_name")[8:]
+    interface_ip = request.form.get("interface_ip")
+    ip = request.form.get("router_ip")
+    router = MYCOL.find_one({"router_ipaddr": ip})
+    print(loopbackNumber, interface_ip, ip)
+    produce(RABBITMQ_HOST, json.dumps({
+                "action": "delete_loopback",
+                "router_ipaddr": ip,
+                "loopback_number": loopbackNumber,
+                "interface_ip": interface_ip,
+                "username": router["username"],
+                "password": router["password"]
+            }).encode("utf-8"))
+    return redirect(url_for("menu", ip=ip))
 
 if __name__ == "__main__":
     APP.run(host="0.0.0.0", port=8080)

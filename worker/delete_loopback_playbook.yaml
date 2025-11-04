@@ -1,0 +1,15 @@
+---
+- name: Delete Loopback Interface on Cisco Router
+  hosts: all
+  gather_facts: no
+  connection: network_cli
+
+  vars:
+    ansible_network_os: cisco.ios.ios
+    ansible_ssh_common_args: "-oKexAlgorithms=+diffie-hellman-group14-sha1 -oHostKeyAlgorithms=+ssh-rsa"
+
+  tasks:
+    - name: Remove Loopback Interface Configuration
+      ios_config:
+        lines:
+          - no interface Loopback{{ loopback_number }}
