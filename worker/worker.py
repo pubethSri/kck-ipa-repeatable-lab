@@ -1,7 +1,6 @@
 import pika
 import os
 import time
-import json
 from callback import callback
 
 

@@ -1,7 +1,5 @@
 import json
 import time
-import pika
-import os
 from workload import (
     create_loopback,
     delete_loopback,
