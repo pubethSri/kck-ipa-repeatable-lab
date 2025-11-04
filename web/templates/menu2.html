@@ -1,0 +1,52 @@
+<html>
+<head>
+    <title>Router Management Menu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container mt-4">
+        <!-- Header -->
+        <div class="card bg-primary text-white mb-4">
+            <div class="card-body">
+                <h1 class="card-title mb-0">
+                    <i class="fas fa-network-wired me-2"></i>
+                    Router: {{ router_ip }}
+                </h1>
+            </div>
+        </div>
+
+        <!-- Menu Options -->
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center p-5">
+                        <h2 class="h4 mb-4">Choose an Action</h2>
+                        <div class="d-grid gap-3">
+                                <a href="{{ url_for('show_interfaces', ip=router_ip) }}" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-desktop me-2"></i>
+                                    Show Interface Status
+                                </a>
+                                <a href="{{ url_for('show_motd', ip=router_ip) }}" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-message me-2"></i>
+                                    Message of the Day (MOTD)
+                                </a>
+                                <a href="{{ url_for('configure_loopback', ip=router_ip) }}" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-wrench me-2"></i>
+                                    Configure Loopback Interfaces
+                                </a>
+                                <a href="{{ url_for('main') }}" class="btn btn-secondary btn-lg">
+                                    <i class="fas fa-arrow-left me-2"></i>
+                                    Back to Router List
+                                </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

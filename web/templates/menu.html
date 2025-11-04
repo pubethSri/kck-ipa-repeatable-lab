@@ -15,6 +15,7 @@
             <div class="menu-links">
                 <button><a href="{{ url_for('show_interfaces', ip=router_ip) }}">Show Interface Status</a></button>
                 <button><a href="{{ url_for('show_motd', ip=router_ip) }}">Message of the Day (MOTD)</a></button>
+                <button><a href="{{ url_for('configure_loopback', ip=router_ip) }}">Configure Loopback Interfaces</a></button>
                 <button><a href="{{ url_for('main') }}">Back to Router List</a></button>
             </div>
         </div>

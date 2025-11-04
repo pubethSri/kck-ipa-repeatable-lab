@@ -1,0 +1,93 @@
+<html>
+<head>
+    <title>Interface Manager</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+    <div>
+        <div>
+            <h1>Router: {{ router_ip }}</h1>
+            {% if timestamp %}
+            <small>Last Updated: {{ timestamp.strftime('%Y-%m-%d %H:%M:%S') if timestamp else 'N/A' }}</small>
+            {% endif %}
+            <button>
+                <a href="{{ url_for('menu', ip=router_ip) }}">Back to Menu</a>
+            </button>
+        </div>
+
+        <div>
+            <span>{{ data|length }} interfaces</span>
+        </div>
+
+        <div>
+            {% if data %}
+                {% for iface in data %}
+                <div>
+                    <div>
+                        <h6>{{ iface.interface }}</h6>
+                        {% if iface.status == 'up' %}
+                            <span>UP</span>
+                        {% elif iface.status == 'administratively down' %}
+                            <span>ADMIN DOWN</span>
+                        {% else %}
+                            <span>DOWN</span>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <div>
+                            <small>IP Address</small>
+                            <code>{{ iface.ip_address }}</code>
+                        </div>
+                        <div>
+                            <small>Protocol Status</small>
+                            <span>
+                                {{ iface.proto|upper }}
+                            </span>
+                        </div>
+                        <div>
+                            <form method="POST" action="{{ url_for('delete_loopback') }}" onsubmit="alert('Loopback will be deleted in 1 minute');">
+                                <input type="hidden" name="interface_name" value="{{ iface.interface }}">
+                                <input type="hidden" name="interface_ip" value="{{ iface.ip_address }}">
+                                <input type="hidden" name="router_ip" value="{{ router_ip }}">
+                                <button type="submit">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div>
+                    <p>No interfaces available</p>
+                    <p>Click "Add Interface" to create a new one</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div id="addInterfaceModal">
+        <div>
+            <div>
+                <h5>Add New Interface</h5>
+            </div>
+            <form method="post" action="{{ url_for('create_loopback') }}" onsubmit="alert('Loopback will be created in 1 minute');">
+                <div>
+                    <div>
+                        <label for="loopbackNumber">Loopback Number</label>
+                        <input type="number" id="loopbackNumber" name="loopbackNumber" placeholder="Loopback" min="0" required>
+                    </div>
+                    <div>
+                        <label for="interface_ip">IP Address</label>
+                        <input type="text" id="interface_ip" name="interface_ip" placeholder="e.g., 10.0.15.62" required>
+                    </div>
+                </div>
+                <div>
+                    <input type="hidden" name="router_ip" value="{{ router_ip }}">
+                    <button type="button">Cancel</button>
+                    <button type="submit">Add Interface</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
