@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kck-ipa-repeatable-lab-web
+  namespace: devops-tools
+spec:
+  project: ipa2025
+  source:
+    repoURL: 'https://github.com/pubethSri/kck-ipa-repeatable-lab'
+    targetRevision: HEAD
+    path: web/manifests
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ipa2025
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

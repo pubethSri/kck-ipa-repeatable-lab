@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kck-ipa-repeatable-lab-web-ingress
+  namespace: ipa2025
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kck-ipa-repeatable-lab-web-service
+                port:
+                  number: 80
