@@ -1,8 +1,7 @@
-@import url('https://fonts.googleapi.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&display=swap');
-*{ 
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&display=swap');
+*{
     font-family: "Google Sans Code", monospace;
 }
-
 body {
     background: lightsteelblue;
     padding: 20px 50px 50px 50px;
@@ -206,5 +205,184 @@ h1 {
 }
 
 .chat-box::-webkit-scrollbar-thumb:hover {
+    background: #a8abad;
+}
+
+.router-container {
+    width: 800px;
+}
+
+.router-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px;
+    text-align: center;
+}
+
+.router-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.router-content-horizontal {
+    flex: 1;
+    background: #f8f9fa;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    gap: 20px;
+}
+
+.router-section {
+    flex: 1;
+}
+
+.router-content {
+    flex: 1;
+    background: #f8f9fa;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.router-form {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    height: fit-content;
+}
+
+.router-form h3 {
+    margin: 0 0 15px 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.router-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+}
+
+.router-input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.router-add-btn {
+    width: 100%;
+    background: #667eea;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.router-add-btn:hover {
+    background: #5568d3;
+}
+
+.router-list-section {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.router-list-section h3 {
+    margin: 0 0 15px 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.router-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.router-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.router-info {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex: 1;
+}
+
+.router-ip {
+    font-weight: 600;
+    color: #0084ff;
+    font-size: 14px;
+}
+
+.router-username {
+    color: #666;
+    font-size: 13px;
+}
+
+.router-delete-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.router-delete-btn:hover {
+    background: #c82333;
+}
+
+/* Scrollbar for router content */
+.router-content-horizontal::-webkit-scrollbar,
+.router-content::-webkit-scrollbar,
+.router-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.router-content-horizontal::-webkit-scrollbar-track,
+.router-content::-webkit-scrollbar-track,
+.router-list::-webkit-scrollbar-track {
+    background: #f8f9fa;
+}
+
+.router-content-horizontal::-webkit-scrollbar-thumb,
+.router-content::-webkit-scrollbar-thumb,
+.router-list::-webkit-scrollbar-thumb {
+    background: #bcc0c4;
+    border-radius: 3px;
+}
+
+.router-content-horizontal::-webkit-scrollbar-thumb:hover,
+.router-content::-webkit-scrollbar-thumb:hover,
+.router-list::-webkit-scrollbar-thumb:hover {
     background: #a8abad;
 }
