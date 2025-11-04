@@ -41,7 +41,7 @@ def main():
 def menu(ip):
     router = MYCOL.find_one({"router_ipaddr": ip})
     if router:
-        return render_template("menu2.html", router_ip=ip)
+        return render_template("menu.html", router_ip=ip)
     return redirect("/")
 
 
@@ -75,7 +75,7 @@ def delete_router():
 @APP.route("/router/<string:ip>")
 def show_interfaces(ip):
     return render_template(
-        "show_interface2.html", data=INFO.find({"router_ip": ip}), router_ip=ip
+        "show_interface.html", data=INFO.find({"router_ip": ip}), router_ip=ip
     )
 
 
@@ -100,7 +100,7 @@ def show_motd(ip):
                     }
                 ).encode("utf-8"),
             )
-        return redirect(url_for("menu2", ip=ip))
+        return redirect(url_for("menu", ip=ip))
 
     # Get the latest MOTD message for this router
     latest_motd = MOTD.find_one({"router_ip": ip}, sort=[("timestamp", -1)])
@@ -108,7 +108,7 @@ def show_motd(ip):
     current_motd = (
         latest_motd["message"] if latest_motd["message"] != "" else "No MOTD set"
     )
-    return render_template("show_motd2.html", router_ip=ip, motd=current_motd)
+    return render_template("show_motd.html", router_ip=ip, motd=current_motd)
 
 
 @APP.route("/configure_loopback/<ip>")
@@ -119,7 +119,7 @@ def configure_loopback(ip):
         for iface in data.get("interfaces", [])
         if iface["interface"].startswith("Loopback")
     ]
-    return render_template("configure_loopback2.html", data=loopback, router_ip=ip)
+    return render_template("configure_loopback.html", data=loopback, router_ip=ip)
 
 
 @APP.route("/create_loopback", methods=["POST"])
@@ -142,7 +142,7 @@ def create_loopback():
             }
         ).encode("utf-8"),
     )
-    return redirect(url_for("menu2", ip=ip))
+    return redirect(url_for("menu", ip=ip))
 
 
 @APP.route("/delete_loopback", methods=["POST"])
@@ -165,7 +165,7 @@ def delete_loopback():
             }
         ).encode("utf-8"),
     )
-    return redirect(url_for("menu2", ip=ip))
+    return redirect(url_for("menu", ip=ip))
 
 
 # WebSocket Chat Events

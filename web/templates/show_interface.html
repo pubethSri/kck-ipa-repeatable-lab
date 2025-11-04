@@ -2,68 +2,87 @@
 <head>
     <title>Sample app</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../static/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>Router: {{ router_ip }}</h1>
-            <button>
-                <a href="{{ url_for('menu', ip=router_ip) }}">Back to Menu</a>
-            </button>
+<body class="bg-light">
+    <div class="container mt-4">
+        <!-- Header -->
+        <div class="card bg-primary text-white mb-4">
+            <div class="card-body">
+                <h1 class="card-title mb-0">
+                    <i class="fas fa-router me-2"></i>
+                    Router: {{ router_ip }}
+                </h1>
+                    <a href="{{ url_for('menu', ip=router_ip) }}" class="btn btn-light btn-sm mt-2">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Menu
+                    </a>
+                
+            </div>
         </div>
 
-        <div class="interface-details">
-            <div class="section-header">
-                <h2>Interface Details</h2>
+        <!-- Interface Details -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <h2 class="h5 mb-0">
+                    <i class="fas fa-ethernet me-2"></i>Interface Details
+                </h2>
             </div>
-            <div class="section-body">
+            <div class="card-body p-0">
                 {% if data %}
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Timestamp</th>
-                            <th>Interface</th>
-                            <th>IP Address</th>
-                            <th>Status</th>
-                            <th>Protocol</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for info in data %}
-                            {% for things in info.interfaces %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover mb-0">
+                        <thead class="table-secondary">
                             <tr>
-                                <td>{{ info.timestamp }}</td>
-                                <td>{{ things.interface }}</td>
-                                <td>{{ things.ip_address }}</td>
-                                <td>
-                                    {% if things.status == 'up' %}
-                                        <span>{{ things.status }}</span>
-                                    {% elif things.status == 'down' %}
-                                        <span>{{ things.status }}</span>
-                                    {% else %}
-                                        <span>{{ things.status }}</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if things.proto == 'up' %}
-                                        <span>{{ things.proto }}</span>
-                                    {% else %}
-                                        <span>{{ things.proto }}</span>
-                                    {% endif %}
-                                </td>
-                            </tr> 
+                                <th><i class="fas fa-clock me-1"></i>Timestamp</th>
+                                <th><i class="fas fa-network-wired me-1"></i>Interface</th>
+                                <th><i class="fas fa-globe me-1"></i>IP Address</th>
+                                <th><i class="fas fa-signal me-1"></i>Status</th>
+                                <th><i class="fas fa-cog me-1"></i>Protocol</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for info in data %}
+                                {% for things in info.interfaces %}
+                                <tr>
+                                    <td><small class="text-muted">{{ info.timestamp }}</small></td>
+                                    <td><code class="bg-light px-2 py-1 rounded">{{ things.interface }}</code></td>
+                                    <td>{{ things.ip_address }}</td>
+                                    <td>
+                                        {% if things.status == 'up' %}
+                                            <span class="badge bg-success">{{ things.status }}</span>
+                                        {% elif things.status == 'down' %}
+                                            <span class="badge bg-danger">{{ things.status }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ things.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if things.proto == 'up' %}
+                                            <span class="badge bg-success">{{ things.proto }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ things.proto }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr> 
+                                {% endfor %}
+                                <tr class="table-secondary">
+                                    <td colspan="5" class="p-1"></td>
+                                </tr>
                             {% endfor %}
-                        {% endfor %}
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                </div>
                 {% else %}
-                <div class="no-data">
+                <div class="text-center py-4 text-muted">
+                    <i class="fas fa-exclamation-circle fa-2x mb-2"></i>
                     <p>No interface data available</p>
                 </div>
                 {% endif %}
             </div>
         </div>
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
