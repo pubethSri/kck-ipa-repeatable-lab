@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kck-ipa-repeatable-lab-web 
+  namespace: ipa2025
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: kck-ipa-repeatable-lab-web 
+  template:
+    metadata:
+      labels:
+        app: kck-ipa-repeatable-lab-web 
+    spec:
+      containers:
+        - name: kck-ipa-repeatable-lab-web 
+          image: kuqing/kck-ipa-repeatable-lab-web:latest
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: "super-secret"
