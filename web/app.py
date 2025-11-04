@@ -12,7 +12,13 @@ from producer import produce
 
 APP = Flask(__name__)
 APP.config["SECRET_KEY"] = "your-secret-key-here"
-socketio = SocketIO(APP, cors_allowed_origins="*")
+socketio = SocketIO(
+    APP,
+    cors_allowed_origins="*",
+    async_mode="threading",
+    logger=True,
+    engineio_logger=True,
+)
 
 MONGO_USER = os.environ.get("MONGO_INITDB_ROOT_USERNAME")
 MONGO_PASSWORD = os.environ.get("MONGO_INITDB_ROOT_PASSWORD")
@@ -185,6 +191,10 @@ def handle_message(data):
         }
         # Save to MongoDB
         CHAT.insert_one(message_data)
+
+        # Remove _id before broadcasting (ObjectId is not JSON serializable)
+        message_data.pop("_id", None)
+
         # Broadcast to all clients
         emit("new_message", message_data, broadcast=True)
 
